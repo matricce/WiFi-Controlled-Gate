@@ -45,7 +45,7 @@ String tempoLigado() {
   uint8_t milissegundos = ((duracao % 1000) / 100);
   uint8_t segundos = ((duracao / 1000) % 60);
   uint8_t minutos = ((duracao / (1000 * 60)) % 60);
-  uint8_t horas = ((duracao / (1000 * 60 * 60)) % 24) + 10;
+  uint8_t horas = ((duracao / (1000 * 60 * 60)) % 24);
   String tempo = "";
   tempo += ((horas < 10) ? "0" : "");
   tempo += String (horas);

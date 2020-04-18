@@ -2,11 +2,12 @@
 #include <ESP8266WebServer.h>
 #include <WebSocketsServer.h>
 #include "index.h"
+#include "credentials.h"
 
 #define GATE_PIN 5
 
-const char* ssid = "Vivo";
-const char* password = "vivo3,141592";
+//const char* ssid = "";
+//const char* password = "";
 
 ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(88);
@@ -15,8 +16,8 @@ IPAddress staticIP(192, 168, 15, 200); //200 'testes' // 201 'oficial'
 IPAddress gateway(192, 168, 15, 1);
 IPAddress subnet(255, 255, 255, 0);
 
-#define CONTROL_TIME_ACTIVADED 1200
-String JSONtxt, controlSwitch, memory, space;
+#define CONTROL_TIME_ACTIVADED 1200 //tempo em que o controle se mantém acionado
+String controlSwitch;
 bool controlState = false;
 
 void buildWebSite() {
@@ -44,17 +45,15 @@ String tempoLigado() {
   uint8_t milissegundos = ((duracao % 1000) / 100);
   uint8_t segundos = ((duracao / 1000) % 60);
   uint8_t minutos = ((duracao / (1000 * 60)) % 60);
-  uint8_t horas = ((duracao / (1000 * 60 * 60)) % 24);
-  String result = "";
-  result += ((horas < 10) ? '0' : '\0');
-  result += String (horas);
-  result += ((minutos < 10) ? ":0" : ":");
-  result += String (minutos);
-  result += ((segundos < 10) ? ":0" : ":");
-  result += String (segundos);
-  //result += ':';
-  //result += String (milissegundos);
-  return result;
+  uint8_t horas = ((duracao / (1000 * 60 * 60)) % 24) + 10;
+  String tempo = "";
+  tempo += ((horas < 10) ? "0" : "");
+  tempo += String (horas);
+  tempo += ((minutos < 10) ? ":0" : ":");
+  tempo += String (minutos);
+  tempo += ((segundos < 10) ? ":0" : ":");
+  tempo += String (segundos);
+  return tempo;
   wait = millis();
   }
 }
@@ -85,16 +84,10 @@ void loop() {
     controlState = false;
 
   digitalWrite(GATE_PIN, controlState);
-  if (millis() - wait > 1000) {
-    memory = ESP.getFreeHeap();
-    space = ESP.getFreeSketchSpace();
-    wait = millis();
-  }
   controlSwitch = "OFF";
   if (controlState) {
     controlSwitch = "ON";
   }
-  JSONtxt = "{\"controlOn\":\"" + controlSwitch + "\", \"freeMemory\":\"" + memory + "\", \"freeSpace\":\"" + space + "\", \"timeOn\":\"" + tempoLigado() + "\"}";
+  String JSONtxt = "{\"controlOn\":\"" + controlSwitch + "\", \"timeOn\":\"" + tempoLigado() + "\"}";
   webSocket.broadcastTXT(JSONtxt);
-  delay(75);
 }

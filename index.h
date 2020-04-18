@@ -1,5 +1,6 @@
 const char webSiteContent[] PROGMEM = R"=====(
 <html>
+<link rel="icon" href="https://t4.ftcdn.net/jpg/01/85/91/59/240_F_185915956_Pw79jOJmiCb9OcHTP927IoKrdO8UHM7W.jpg">
 <meta charset="utf-8">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
@@ -13,8 +14,6 @@ const char webSiteContent[] PROGMEM = R"=====(
     websock.onmessage = function(evt) {
       JSONobj = JSON.parse(evt.data);
       document.getElementById('btn').innerHTML = JSONobj.controlOn;
-      document.getElementById('freeMemory').innerHTML = 'Memória: ' + JSONobj.freeMemory + ' bytes';
-      document.getElementById('freeSpace').innerHTML = 'Espaço: ' + JSONobj.freeSpace + ' bytes';
       document.getElementById('timeOn').innerHTML = 'Tempo ligado: ' + JSONobj.timeOn;
 
       if(JSONobj.controlOn == 'ON') {
@@ -39,16 +38,8 @@ const char webSiteContent[] PROGMEM = R"=====(
 body, html {
   height: 98%;
   background-color:#E8EAF6;
-  font: 10px arial, sans-serif;
   font-weight: bold;
-  overscroll-behavior: none;
   overflow: hidden;
-}
-.card{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 70%;
 }
 #header{
   position: absolute;
@@ -60,12 +51,10 @@ body, html {
   text-decoration:none;
 }
 h5{
-  position: absolute;
-  top: 20%;
+  margin-top: 15px;
+  text-align: center;
   font: 40px arial, sans-serif;
   font-weight: bold;
-  line-height: 30px;
-  text-align: center;
   color: #B2DFDB ;
 }
 i{
@@ -85,15 +74,15 @@ i{
 #btn{
   display: inline-block;
   text-decoration:none;
-  background: #000000;
-  color: #000000;
+  background: #434343;
+  color: #434343;
   font: 100px arial, sans-serif;
   line-height: 320px;
   width: 320px;
   height: 320px;
   border-radius: 20%;
   text-align: center;
-  box-shadow: 0px 0px 0px 8px #8cd460;
+  box-shadow: 0px 0px 0px 8px #434343;
   border: solid 2px rgba(255,255,255,0.47);
   transition: 0.4s;  
 }
@@ -109,7 +98,7 @@ i{
 }
 </style>
 <body>
-  <div id="header" class="card">
+  <div id="header">
     <h5>Controle Portão</h5>
     <a href="."><i href="." class="fa fa-refresh"></i></a>
     </div>
@@ -117,8 +106,6 @@ i{
   <a href="#" id="btn" ONCLICK='button()'></a>
 </div>
 <div id="footer">
-  <h2 id="freeMemory"></h2>
-  <h2 id="freeSpace"></h2>
   <h2 id="timeOn"></h2>
 </div>
 </body>

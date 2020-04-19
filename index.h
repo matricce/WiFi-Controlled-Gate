@@ -33,7 +33,7 @@ const char webSiteContent[] PROGMEM = R"=====(
   }
   function button() {
     if(document.getElementById('btn').innerHTML === 'OFF') {
-      websock.send(websock.send(btn));
+      websock.send('LEDonoff=ON');
     }
   }
   function forceReload() {
@@ -123,6 +123,3 @@ i{
 </body>
 <html>
 )=====";
-
-const char STR_ON[] PROGMEM = "ON";
-const char STR_OFF[] PROGMEM = "OFF";

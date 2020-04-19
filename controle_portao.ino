@@ -18,7 +18,7 @@ IPAddress subnet(255, 255, 255, 0);
 
 #define CONTROL_TIME_ACTIVADED 1200 //tempo em que o controle se mantém acionado
 String controlSwitch;
-bool controlState = false;
+bool controlState = false, updateClients = false;
 
 void buildWebSite() {
   server.send(200, "text/html", webSiteContent);
@@ -26,7 +26,15 @@ void buildWebSite() {
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t welenght) {
   String payloadString = (const char*)payload;
-  if (type == WStype_TEXT) {
+  if (type == WStype_DISCONNECTED) {
+    Serial.printf("[%u] Disconnected!\n", num);
+  }
+  else if (type == WStype_CONNECTED) {
+    //IPAddress ip = webSocket.remoteIP(num);
+    //Serial.printf("[%u] Connected from %d.%d.%d.%d\n", num, ip[0], ip[1], ip[2], ip[3]);
+    updateClients = true;
+  }
+  else if (type == WStype_TEXT) {
     byte separator = payloadString.indexOf('=');
     String var = payloadString.substring(0, separator);
     String val = payloadString.substring(separator + 1);
@@ -39,23 +47,22 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t weleng
 }
 
 String tempoLigado() {
-  static uint32_t wait;
-  if (millis() - wait > 1000) {
   uint32_t duracao = millis();
-  uint8_t milissegundos = ((duracao % 1000) / 100);
   uint8_t segundos = ((duracao / 1000) % 60);
   uint8_t minutos = ((duracao / (1000 * 60)) % 60);
   uint8_t horas = ((duracao / (1000 * 60 * 60)) % 24);
+  uint8_t dias = ((duracao / (1000 * 60 * 60 * 24)));
   String tempo = "";
-  tempo += ((horas < 10) ? "0" : "");
+  tempo += ((dias < 10) ? "0" : "");
+  tempo += String (dias);
+  tempo += ((horas < 10) ? "d 0" : "d ");
   tempo += String (horas);
-  tempo += ((minutos < 10) ? ":0" : ":");
+  tempo += ((minutos < 10) ? "h 0" : "h ");
   tempo += String (minutos);
-  tempo += ((segundos < 10) ? ":0" : ":");
+  tempo += ((segundos < 10) ? "m 0" : "m ");
   tempo += String (segundos);
+  tempo += "s";
   return tempo;
-  wait = millis();
-  }
 }
 
 void setup() {
@@ -75,19 +82,37 @@ void setup() {
 
 void loop() {
   static uint32_t controlTimer;
-  static uint32_t wait;
+  static uint32_t wait1sec;
   webSocket.loop();
   server.handleClient();
-  if (!controlState)
+
+  if (!controlState) {
     controlTimer = millis();
-  if (millis() - controlTimer > CONTROL_TIME_ACTIVADED)
+  }
+  else if (controlSwitch == "OFF"){
+    updateClients = true;
+  }
+  if (millis() - controlTimer > CONTROL_TIME_ACTIVADED) {
     controlState = false;
+    updateClients = true;
+  }
 
   digitalWrite(GATE_PIN, controlState);
+  
   controlSwitch = "OFF";
   if (controlState) {
     controlSwitch = "ON";
   }
-  String JSONtxt = "{\"controlOn\":\"" + controlSwitch + "\", \"timeOn\":\"" + tempoLigado() + "\"}";
-  webSocket.broadcastTXT(JSONtxt);
+
+  if(millis() - wait1sec > 1000) {
+    updateClients = true;
+    wait1sec = millis();
+  }
+  
+  if (updateClients) {
+    String JSONtxt = "{\"controlOn\":\"" + controlSwitch + "\", \"timeOn\":\"" + tempoLigado() + "\"}";
+    Serial.println(tempoLigado());
+    webSocket.broadcastTXT(JSONtxt);
+    updateClients = false;
+  }
 }

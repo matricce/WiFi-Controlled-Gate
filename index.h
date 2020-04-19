@@ -8,13 +8,16 @@ const char webSiteContent[] PROGMEM = R"=====(
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <script>
-  InitWebSocket()
+  var t0 = 0;
+  var t1 = 0;
+  InitWebSocket();
   function InitWebSocket() {
     websock = new WebSocket("ws://" + window.location.hostname + ":88/");
     websock.onmessage = function(evt) {
       JSONobj = JSON.parse(evt.data);
       document.getElementById('btn').innerHTML = JSONobj.controlOn;
-      document.getElementById('timeOn').innerHTML = 'Tempo ligado: ' + JSONobj.timeOn;
+      document.getElementById('timeOn').innerHTML = 'Ligado há: ' + JSONobj.timeOn;
+      t0 = performance.now();
 
       if(JSONobj.controlOn == 'ON') {
         document.getElementById('btn').style.background = '#E3E3E3';
@@ -32,6 +35,15 @@ const char webSiteContent[] PROGMEM = R"=====(
     if(document.getElementById('btn').innerHTML === 'OFF') {
       websock.send(websock.send(btn));
     }
+  }
+  function forceReload() {
+    setInterval(verify, 1000);
+  }
+  function verify() {
+    if(t1 - t0 > 5000) {
+      InitWebSocket();
+    }
+    t1 = performance.now();
   }
 </script>
 <style>
@@ -97,10 +109,10 @@ i{
   color: #B2DFDB;
 }
 </style>
-<body>
+<body ONLOAD="forceReload()">
   <div id="header">
     <h5>Controle Portão</h5>
-    <a href="."><i href="." class="fa fa-refresh"></i></a>
+    <a href="#" ONCLICK='InitWebSocket()'><i href="." class="fa fa-refresh"></i></a>
     </div>
 <div id="mid">
   <a href="#" id="btn" ONCLICK='button()'></a>
@@ -111,3 +123,6 @@ i{
 </body>
 <html>
 )=====";
+
+const char STR_ON[] PROGMEM = "ON";
+const char STR_OFF[] PROGMEM = "OFF";

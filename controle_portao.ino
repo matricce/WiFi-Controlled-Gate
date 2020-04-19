@@ -1,3 +1,4 @@
+//o botão pode parar de funcionar caso o aplicativo fique em segundo plano por muito tempo
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <WebSocketsServer.h>
@@ -6,6 +7,7 @@
 
 #define GATE_PIN 5
 
+//Descomendar e inserir os dados do wifi para o esp se conectar
 //const char* ssid = "";
 //const char* password = "";
 
@@ -25,23 +27,25 @@ void buildWebSite() {
 }
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t welenght) {
-  String payloadString = (const char*)payload;
   if (type == WStype_DISCONNECTED) {
     Serial.printf("[%u] Disconnected!\n", num);
   }
   else if (type == WStype_CONNECTED) {
-    //IPAddress ip = webSocket.remoteIP(num);
-    //Serial.printf("[%u] Connected from %d.%d.%d.%d\n", num, ip[0], ip[1], ip[2], ip[3]);
+    IPAddress ip = webSocket.remoteIP(num);
+    Serial.printf("[%u] Connected from %d.%d.%d.%d\n", num, ip[0], ip[1], ip[2], ip[3]);
     updateClients = true;
   }
   else if (type == WStype_TEXT) {
+    String payloadString = (const char*)payload;
     byte separator = payloadString.indexOf('=');
     String var = payloadString.substring(0, separator);
     String val = payloadString.substring(separator + 1);
     if (var = "controlOn") {
       controlState = false;
       if (val = "ON")
+      Serial.println(val);
         controlState = true;
+        updateClients = true;
     }
   }
 }
@@ -89,30 +93,28 @@ void loop() {
   if (!controlState) {
     controlTimer = millis();
   }
-  else if (controlSwitch == "OFF"){
-    updateClients = true;
-  }
   if (millis() - controlTimer > CONTROL_TIME_ACTIVADED) {
     controlState = false;
     updateClients = true;
   }
 
   digitalWrite(GATE_PIN, controlState);
-  
+
   controlSwitch = "OFF";
   if (controlState) {
     controlSwitch = "ON";
   }
 
-  if(millis() - wait1sec > 1000) {
+  if (millis() - wait1sec > 1000) {
     updateClients = true;
     wait1sec = millis();
   }
-  
+
   if (updateClients) {
     String JSONtxt = "{\"controlOn\":\"" + controlSwitch + "\", \"timeOn\":\"" + tempoLigado() + "\"}";
     Serial.println(tempoLigado());
     webSocket.broadcastTXT(JSONtxt);
     updateClients = false;
+    wait1sec = millis();
   }
 }

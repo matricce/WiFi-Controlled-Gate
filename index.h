@@ -8,11 +8,29 @@ const char webSiteContent[] PROGMEM = R"=====(
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <script>
+  var websock;
   var t0 = 0;
   var t1 = 0;
+  const socketMessageListener = (event) => {
+    console.log(event.data);
+  };
+
+  const socketOpenListener = (event) => {
+    console.log('Connected');
+  };
+
+  const socketCloseListener = (event) => {
+    if (websock) {
+      console.error('Disconnected.');
+    }
+    websock = new WebSocket("ws://" + window.location.hostname + ":88/");
+    websock.addEventListener('open', socketOpenListener);
+    websock.addEventListener('message', socketMessageListener);
+    websock.addEventListener('close', socketCloseListener);
+  };
+  socketCloseListener();
   InitWebSocket();
   function InitWebSocket() {
-    websock = new WebSocket("ws://" + window.location.hostname + ":88/");
     websock.onmessage = function(evt) {
       JSONobj = JSON.parse(evt.data);
       document.getElementById('btn').innerHTML = JSONobj.controlOn;

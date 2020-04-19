@@ -1,6 +1,12 @@
 //o botão pode parar de funcionar caso o aplicativo fique em segundo plano por muito tempo
+#ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
+#elif defined ESP32
+#include <WiFi.h>
+#include <WebServer.h>
+#endif
+
 #include <WebSocketsServer.h>
 #include "index.h"
 #include "credentials.h"
@@ -11,10 +17,15 @@
 //const char* ssid = "";
 //const char* password = "";
 
+#ifdef ESP8266
 ESP8266WebServer server(80);
+#elif defined ESP32
+WebServer server(80);
+#endif
+
 WebSocketsServer webSocket = WebSocketsServer(88);
 
-IPAddress staticIP(192, 168, 15, 200); //200 'testes' // 201 'oficial'
+IPAddress staticIP(192, 168, 15, 200);
 IPAddress gateway(192, 168, 15, 1);
 IPAddress subnet(255, 255, 255, 0);
 
@@ -112,7 +123,6 @@ void loop() {
 
   if (updateClients) {
     String JSONtxt = "{\"controlOn\":\"" + controlSwitch + "\", \"timeOn\":\"" + tempoLigado() + "\"}";
-    Serial.println(tempoLigado());
     webSocket.broadcastTXT(JSONtxt);
     updateClients = false;
     wait1sec = millis();

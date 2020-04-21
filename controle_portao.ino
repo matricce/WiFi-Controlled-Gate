@@ -2,7 +2,7 @@
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-#elif defined ESP32
+#else
 #include <WiFi.h>
 #include <WebServer.h>
 #endif
@@ -13,13 +13,13 @@
 
 #define GATE_PIN 5
 
-//Descomendar e inserir os dados do wifi para o esp se conectar
+//Descomentar e inserir os dados do wifi para o esp se conectar
 //const char* ssid = "";
 //const char* password = "";
 
 #ifdef ESP8266
 ESP8266WebServer server(80);
-#elif defined ESP32
+#else
 WebServer server(80);
 #endif
 
@@ -61,7 +61,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t weleng
   }
 }
 
-String tempoLigado() {
+String timeOn() {
   uint32_t duracao = millis();
   uint8_t segundos = ((duracao / 1000) % 60);
   uint8_t minutos = ((duracao / (1000 * 60)) % 60);
@@ -122,7 +122,7 @@ void loop() {
   }
 
   if (updateClients) {
-    String JSONtxt = "{\"controlOn\":\"" + controlSwitch + "\", \"timeOn\":\"" + tempoLigado() + "\"}";
+    String JSONtxt = "{\"controlOn\":\"" + controlSwitch + "\", \"timeOn\":\"" + timeOn() + "\"}";
     webSocket.broadcastTXT(JSONtxt);
     updateClients = false;
     wait1sec = millis();

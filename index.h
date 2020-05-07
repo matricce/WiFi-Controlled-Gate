@@ -5,14 +5,14 @@ const char webSiteContent[] PROGMEM = R"=====(
 <meta charset="utf-8">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
-body, html {
-  height: 98%;
+body{
   background-color:#E8EAF6;
+  margin:auto;
+  font-family: Arial, sans-serif;
+  color: #B2DFDB;
   font-weight: bold;
-  overflow: hidden;
 }
 #header{
   position: absolute;
@@ -20,15 +20,11 @@ body, html {
   height: 70px;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   background-color:#00796B;
-  font: 50px arial, sans-serif;
   text-decoration:none;
 }
-h5{
+h1{
   margin-top: 15px;
   text-align: center;
-  font: 40px arial, sans-serif;
-  font-weight: bold;
-  color: #B2DFDB ;
 }
 #refresh{
   display: flex;
@@ -36,6 +32,7 @@ h5{
   margin-right:0px;
   margin-top: -60px;
   width:43px;
+  font-size: 50px;
 }
 .fa-refresh{
   display: inline-block;
@@ -70,17 +67,15 @@ h5{
 #footer{
   position: absolute;
   width: 100%;
-  height: 150px;
+  height: 80px;
   bottom: 0px;
   background: #00796B;
   box-shadow: 0px -4px 4px rgba(0, 0, 0, 0.25);
-  font-weight: bold;
-  color: #B2DFDB;
 }
 </style>
 <body ONLOAD="forceReload()">
   <div id="header">
-    <h5>Controle Portão</h5>
+    <h1>Controle Portão</h1>
     <div id="refresh">
       <a href="#" ONCLICK='location.reload(0)'><i href="." class="fa fa-refresh"></i></a>
     </div>
@@ -89,7 +84,7 @@ h5{
   <a href="#" id="btn"><i class="fa fa-bolt"></i></a>
 </div>
 <div id="footer">
-  <h2 id="timeOn"></h2>
+  <h4 id="timeOn"></h4>
 </div>
 </body>
 <script>
@@ -100,9 +95,9 @@ h5{
   var button = document.getElementById('btn');
   const socketMessageListener = (event) => {
     t0 = performance.now();
-          JSONobj = JSON.parse(event.data);
-      state = JSONobj.controlOn;
-      document.getElementById('timeOn').innerHTML = `Ligado há: ${JSONobj.timeOn}`; 
+    JSONobj = JSON.parse(event.data);
+    state = JSONobj.controlOn;
+    document.getElementById('timeOn').innerHTML = `Ligado há: ${JSONobj.timeOn}`; 
       if(JSONobj.controlOn == 'ON') {
         button.style.background = '#E3E3E3';
         button.style.color = '#434343';
@@ -129,22 +124,21 @@ h5{
     websock.addEventListener('close', socketCloseListener);
   };
 
-  socketCloseListener();
-  
-  button.onclick = function (event) {
-    if(state === 'OFF') {
-      websock.send('LEDonoff=ON');
-    }
+  socketCloseListener();   
+button.onclick = function (event) {
+  if(state === 'OFF') {
+    websock.send('LEDonoff=ON');
   }
-  function forceReload() {
-    setInterval(verify, 2000);
+}
+function forceReload() {
+  setInterval(verify, 2000);
+}
+function verify() {
+  if(t1 - t0 > 5000) {
+    location.reload(0);
   }
-  function verify() {
-    if(t1 - t0 > 5000) {
-      location.reload(0);
-    }
-    t1 = performance.now();
-  }
+  t1 = performance.now();
+}
 </script>
 <html>
 )=====";

@@ -1,14 +1,14 @@
-//o botão pode parar de funcionar caso o aplicativo fique em segundo plano por muito tempo
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
+#include <FS.h>
 #else
 #include <WiFi.h>
 #include <WebServer.h>
+#include <SPIFFS.h>
 #endif
 
 #include <WebSocketsServer.h>
-#include "index.h"
 #include "credentials.h"
 
 #define GATE_PIN 5
@@ -34,7 +34,20 @@ String controlSwitch;
 bool controlState = false, updateClients = false;
 
 void buildWebSite() {
-  server.send(200, "text/html", webSiteContent);
+  if(SPIFFS.begin()){
+    Serial.println("ok");
+  }
+  else{
+    Serial.println("falha");
+    return;
+  }
+  File file = SPIFFS.open(F("/index.htm"), "r");
+  if(file){
+    file.setTimeout(100);
+    String webSiteContent = file.readString();
+    file.close();
+    server.send(200, F("text/html"), webSiteContent);
+  }
 }
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t welenght) {

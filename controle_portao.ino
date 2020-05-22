@@ -29,7 +29,7 @@ IPAddress staticIP(192, 168, 15, 200);
 IPAddress gateway(192, 168, 15, 1);
 IPAddress subnet(255, 255, 255, 0);
 
-#define CONTROL_TIME_ACTIVADED 1200 //tempo em que o controle se mantém acionado
+#define CONTROL_TIME_ACTIVADED 1001 //tempo em que o controle se mantém acionado
 String controlSwitch;
 bool controlState = false, updateClients = false;
 
@@ -127,6 +127,7 @@ void loop() {
   controlSwitch = "OFF";
   if (controlState) {
     controlSwitch = "ON";
+    wait1sec = millis();
   }
 
   if (millis() - wait1sec > 1000) {

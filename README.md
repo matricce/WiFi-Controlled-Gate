@@ -5,7 +5,7 @@ Os materiais utilizados foram:
 1x NodeMCU ESP8266 ESP-12E  
 1x Transistor NPN  
 1x Resistor de 1kΩ  
-1x Controle eletrônico de portão  
+1x Controle do portão eletrônico  
 1x Módulo XL6009 Regulador de Tensão Step Up Ajustável DC-DC  
 1x Fonte de 5VCC  
   

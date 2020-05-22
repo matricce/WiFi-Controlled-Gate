@@ -9,7 +9,7 @@ Os materiais utilizados foram:
 1x Módulo XL6009 Regulador de Tensão Step Up Ajustável DC-DC  
 1x Fonte de 5VCC  
   
-Montagem e funcionamento físico:  
+Montagem e funcionamento da parte física:  
 O circuito é simples, o esp8266 é responsável por enviar um sinal de saída que controla o transistor NPN, o transistor toma lugar de um dos botões físicos do controle eletrônico, fazendo a função de chaveamento. Na alimentação é utilizada uma fonte de 5 volts, os 5 volts são ligados no VIN do esp8266 e o step up é responsável por subir essa tensão para 12v e então alimentar o controle eletrônico.
 
 Aplicação:  

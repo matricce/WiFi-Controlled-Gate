@@ -8,7 +8,7 @@ let state;
 let buttonBg;
 let clock;
 let pingInterval = 250;
-let untilResponse = 1000;
+let untilResponse = 2000;
 let timeout;
 
 function init() {

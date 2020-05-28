@@ -6,13 +6,17 @@ let connected = false;
 let visible = true;
 let state;
 let buttonBg;
-let relogio = setInterval('doPing()', 250);
+let clock;
+let pingInterval = 250;
+let untilResponse = 1000;
+let timeout;
 
 function init() {
   timer = document.getElementById("timeOn");
   button = document.getElementById("btn");
   btn_sound = document.getElementById('tickSound');
   buttonBg = document.getElementsByClassName('buttonHolder')[0];
+  clock = setInterval('doPing()', pingInterval);
   wsConnect(url);
 }
 init();
@@ -25,22 +29,20 @@ function wsConnect(url) {
   websocket.onerror = function(evt) { onError(evt) };
 }
 function onOpen(evt) {
-  console.log("Connected");
-  connected = true;
-  buttonBg.style.backgroundColor = 'rgba(255,0,0,0)';
+  setConnected();
 }
 function onClose(evt) {
-  console.log("Disconnected");
-  connected = false;
+  setDisconnected();
   setTimeout(function() { wsConnect(url) }, 2000);
-  buttonBg.style.backgroundColor = 'rgba(255,0,0,0.5)';
-}
+}visible = true;
 function onMessage(evt) {
-  console.log("Received: " + evt.data);
+  // console.log("Received: " + evt.data);
   JSONobj = JSON.parse(evt.data);
   state = JSONobj.controlState;
   timer.innerHTML = `Ligado há: ${JSONobj.timeOn}`; 
   buttonBg.style.backgroundColor = 'rgba(255,0,0,0)';
+  clearTimeout(timeout);
+  timeout = setTimeout('setDisconnected()', untilResponse);
     if(state == 'ON') {;
       btn_sound.play();
       button.style.animation = 'buttonClick .1s forwards';
@@ -58,7 +60,7 @@ function onError(evt) {
 }
 function doSend(message) {
   if(connected){
-    console.log("Sending: " + message);
+    // console.log("Sending: " + message);
     websocket.send(message);
   }
   else {
@@ -74,15 +76,17 @@ function doPing() {
 }
 function wspause() {
   visible = false;
-  clearInterval(relogio);
+  clearInterval(clock);
   buttonBg.style.backgroundColor = 'rgba(255,0,0,0.5)';
  }
 function wscontinue() {
   visible = true;
-  clearInterval(relogio);
-  relogio = setInterval('doPing()', 250);
-  if (!connected)
-  setTimeout(function() { wsConnect(url) }, 2000);
+  if (!connected) {
+    wsConnect(url);
+    return;
+  }
+  clearInterval(clock);
+  clock = setInterval('doPing()', pingInterval);
 }
 const handleChange = (e) => {
   document.hidden ? wspause() : wscontinue();
@@ -93,3 +97,13 @@ window.oncontextmenu = function(event) {
   event.stopPropagation();
   return false;
 };
+function setConnected() {
+  console.log("Connected");
+  connected = true;
+  buttonBg.style.backgroundColor = 'rgba(0,0,0,0)';
+}
+function setDisconnected() {
+  console.log("Disconnected");
+  connected = false;
+  buttonBg.style.backgroundColor = 'rgba(255,0,0,0.5)';
+}

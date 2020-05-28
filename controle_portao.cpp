@@ -255,8 +255,6 @@ void disconnectClients() {
       if (clients[i].state) {
         if (millis() - clients[i].sinceLastMessage > 10000) {
           Serial.printf("Cliente [%u] ocioso, sendo desconectado!\n", i);
-          Serial.printf("tempo: %lu\n", clients[i].sinceLastMessage);
-          Serial.printf("millis: %lu\n", millis());
           webSocket.disconnect(i);
           clients[i].state = 0;
         }

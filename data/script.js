@@ -81,12 +81,10 @@ function wspause() {
  }
 function wscontinue() {
   visible = true;
-  if (!connected) {
-    wsConnect(url);
-    return;
-  }
   clearInterval(clock);
   clock = setInterval('doPing()', pingInterval);
+  if (!connected)
+  wsConnect(url);
 }
 const handleChange = (e) => {
   document.hidden ? wspause() : wscontinue();

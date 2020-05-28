@@ -2,13 +2,13 @@ let url = "ws://" + window.location.hostname + ":1337/";
 let button;
 let timer;
 let btn_sound;
-let connected = false;
-let visible = true;
+let connected;
+let visible;
 let state;
 let buttonBg;
 let clock;
-let pingInterval = 250;
-let untilResponse = 2000;
+let pingInterval;
+let untilResponse;
 let timeout;
 
 function init() {
@@ -17,6 +17,10 @@ function init() {
   btn_sound = document.getElementById('tickSound');
   buttonBg = document.getElementsByClassName('buttonHolder')[0];
   clock = setInterval('doPing()', pingInterval);
+  connected = false;
+  visible = true;
+  pingInterval = 250;
+  untilResponse = 2000;
   wsConnect(url);
 }
 init();
@@ -74,27 +78,22 @@ button.onclick = function() {
 function doPing() {
   doSend("ping");
 }
-function wspause() {
+function onPause() {
   visible = false;
   clearInterval(clock);
   buttonBg.style.backgroundColor = 'rgba(255,0,0,0.5)';
  }
-function wscontinue() {
+function onResume() {
   visible = true;
   clearInterval(clock);
   clock = setInterval('doPing()', pingInterval);
   if (!connected)
-  wsConnect(url);
+    wsConnect(url);
 }
 const handleChange = (e) => {
-  document.hidden ? wspause() : wscontinue();
+  document.hidden ? onPause() : onResume();
 }
 document.addEventListener("visibilitychange", handleChange);
-window.oncontextmenu = function(event) {
-  event.preventDefault();
-  event.stopPropagation();
-  return false;
-};
 function setConnected() {
   console.log("Connected");
   connected = true;
@@ -105,3 +104,8 @@ function setDisconnected() {
   connected = false;
   buttonBg.style.backgroundColor = 'rgba(255,0,0,0.5)';
 }
+window.oncontextmenu = function(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  return false;
+};

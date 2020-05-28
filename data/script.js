@@ -34,7 +34,7 @@ function onOpen(evt) {
 function onClose(evt) {
   setDisconnected();
   setTimeout(function() { wsConnect(url) }, 2000);
-}visible = true;
+}
 function onMessage(evt) {
   // console.log("Received: " + evt.data);
   JSONobj = JSON.parse(evt.data);

@@ -6,9 +6,12 @@ let connected = 0;
 let visible = 1;
 let state;
 let buttonBg;
-let clock;
-let pingInterval = 250;
-let untilResponse = 2000;
+let pingInterval = 250; //tempo entre pings
+let untilResponse = 2000; //tempo que entre cada tentativa de reconexão com o websocket
+let untilTimeout = 2000; //tempo dado até o app considerar sem respostas e portanto desconexão com o websocket
+let untilCloseApp = 60000; //tempo dado até o app considerar que deve ser encerrado por falta de resposta
+let response;
+let closeApp;
 let timeout;
 
 function init() {
@@ -16,7 +19,7 @@ function init() {
   button = document.getElementById("btn");
   btn_sound = document.getElementById('tickSound');
   buttonBg = document.getElementsByClassName('buttonHolder')[0];
-  clock = setInterval('doPing()', pingInterval);
+  response = setInterval('doPing()', pingInterval);
   wsConnect(url);
 }
 init();
@@ -43,7 +46,9 @@ function onMessage(evt) {
   timer.innerHTML = `Ligado há: ${JSONobj.timeOn}`; 
   buttonBg.style.backgroundColor = 'rgba(255,0,0,0)';
   clearTimeout(timeout);
-  timeout = setTimeout('setDisconnected(\'timeout\')', untilResponse);
+  timeout = setTimeout('setDisconnected(\'timeout\')', untilTimeout);
+  clearTimeout(closeApp);
+  closeApp = setTimeout(function(){window.close();}, untilCloseApp);
     if(state == 'ON') {;
       btn_sound.play();
       button.style.animation = 'buttonClick .1s forwards';
@@ -77,14 +82,14 @@ function doPing() {
 }
 function onPause() {
   visible = false;
-  clearInterval(clock);
+  clearInterval(response);
   clearTimeout(timeout);//???
   buttonBg.style.backgroundColor = 'rgba(255,0,0,0.5)';
  }
 function onResume() {
   visible = true;
-  clearInterval(clock);
-  clock = setInterval('doPing()', pingInterval);
+  clearInterval(response);
+  response = setInterval('doPing()', pingInterval);
   if (!connected)
     wsConnect(url);
 }

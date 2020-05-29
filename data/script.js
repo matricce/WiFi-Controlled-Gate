@@ -1,25 +1,29 @@
 let url = "ws://" + window.location.hostname + ":1337/";
 let button;
 let timer;
-let btn_sound;
+let clickSoundOk;
+let clickSoundBad;
 let connected = 0;
 let visible = 1;
 let state;
 let buttonBg;
 let pingInterval = 250; //tempo entre pings
-let untilResponse = 2000; //tempo que entre cada tentativa de reconexão com o websocket
-let untilTimeout = 2000; //tempo dado até o app considerar sem respostas e portanto desconexão com o websocket
-let untilCloseApp = 60000; //tempo dado até o app considerar que deve ser encerrado por falta de resposta
-let response;
+let untilReconnect = 2000; //tempo que entre cada tentativa de reconexão com o websocket
+let untilDisconnect = 2000; //tempo dado até o app considerar sem respostas e portanto desconexão com o websocket
+let untilCloseApp = 40000; //tempo dado até o app considerar que deve ser encerrado por falta de resposta (máximo 40s)
+let pingResponse;
 let closeApp;
-let timeout;
+let disconnect;
+let reconnect;
 
 function init() {
   timer = document.getElementById("timeOn");
   button = document.getElementById("btn");
-  btn_sound = document.getElementById('tickSound');
+  clickSoundOk = document.getElementById('clickSoundOk');
+  clickSoundBad = document.getElementById('clickSoundBad');
   buttonBg = document.getElementsByClassName('buttonHolder')[0];
-  response = setInterval('doPing()', pingInterval);
+  pingResponse = setInterval('doPing()', pingInterval);
+  clickSoundBad.volume = 0.5;
   wsConnect(url);
 }
 init();
@@ -36,7 +40,8 @@ function onOpen(evt) {
 }
 function onClose(evt) {
   setDisconnected('onClose');
-  setTimeout(function() { wsConnect(url) }, untilResponse);
+  clearTimeout(reconnect);
+  reconnect = setTimeout(function() { wsConnect(url) }, untilReconnect);
 }
 function onMessage(evt) {
   // console.log("Received: " + evt.data);
@@ -45,18 +50,18 @@ function onMessage(evt) {
   state = JSONobj.controlState;
   timer.innerHTML = `Ligado há: ${JSONobj.timeOn}`; 
   buttonBg.style.backgroundColor = 'rgba(255,0,0,0)';
-  clearTimeout(timeout);
-  timeout = setTimeout('setDisconnected(\'timeout\')', untilTimeout);
+  clearTimeout(disconnect);
+  disconnect = setTimeout('setDisconnected(\'timeout\')', untilDisconnect);
   clearTimeout(closeApp);
   closeApp = setTimeout(function(){window.close();}, untilCloseApp);
     if(state == 'ON') {;
-      btn_sound.play();
+      clickSoundOk.play();
       button.style.animation = 'buttonClick .1s forwards';
       button.style.color = 'red';
     }
     else {
-      btn_sound.pause();
-      btn_sound.currentTime = 0;
+      clickSoundOk.pause();
+      clickSoundOk.currentTime = 0;
       button.style.animation = 'buttonRelease .1s forwards';
       button.style.color = 'springgreen';
     }
@@ -74,6 +79,10 @@ function doSend(message) {
   }
 }
 button.onclick = function() {
+  if(!connected) {
+    clickSoundBad.play();
+    return;
+  }
   if(state == 'OFF')
     doSend("setControl");
 }
@@ -82,14 +91,14 @@ function doPing() {
 }
 function onPause() {
   visible = false;
-  clearInterval(response);
-  clearTimeout(timeout);//???
+  clearInterval(pingResponse);
+  clearTimeout(disconnect);//???
   buttonBg.style.backgroundColor = 'rgba(255,0,0,0.5)';
  }
 function onResume() {
   visible = true;
-  clearInterval(response);
-  response = setInterval('doPing()', pingInterval);
+  clearInterval(pingResponse);
+  pingResponse = setInterval('doPing()', pingInterval);
   if (!connected)
     wsConnect(url);
 }

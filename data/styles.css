@@ -1,102 +1,102 @@
 * {
-    margin:0;
-    padding:0;
-    box-sizing: border-box;
+  margin:0;
+  padding:0;
+  box-sizing: border-box;
+}
+html, body {
+  min-height: 100%;
+  min-width: 100%;
+}
+body {
+  background-image: -webkit-linear-gradient(top, #edecec, #cecbc9);
+  overscroll-behavior: contain;
+}
+.buttonHolder {
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  background-color: rgba(255, 0, 0, 0.5);
+}
+.button {
+  background-image: -webkit-linear-gradient(top, #f4f1ee, #fff);
+  box-shadow: 0px 8px 10px 0px rgba(0, 0, 0, .3), inset 0px 4px 1px 4px white, inset 0px -3px 1px 1px rgba(204,198,197,.5);
+  animation: buttonRelease .1s forwards;
+  border-radius: 50%;
+  height: 80vw;
+  max-height: 350px;
+  max-width: 350px;
+  width: 80vw;
+}
+.button:after {
+  color: #e9e6e4;
+  content: "";
+  height: 30px;
+  position: absolute;
+  width: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  filter: grayscale(0);
+}
+a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 60vw;
+  text-decoration: none;
+  color: springgreen;
+  text-shadow: 0px -1px 1px #bdb5b4, 1px 1px 1px white;
+  -webkit-tap-highlight-color: transparent;
+  transition: .1s;
+}
+h1, .reload {
+  color: rgb(114, 112, 112);
+  text-shadow: 0px -1px 1px #bdb5b4, 1px 1px 1px white;
+  font-family: monospace;
+  position: absolute;
+  bottom: 1rem;
+}
+.reload {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  bottom: 100vh;
+  border: none;
+  font-size: 3rem;
+  outline:0;
+}
+/*.button:active {
+  animation: buttonClick .1s forwards;
+}*/
+@keyframes buttonClick {
+  to {
+    background-image: -webkit-linear-gradient(top, #efedec, #f7f4f4);
+    box-shadow: 0 3px 5px 0 rgba(0,0,0,.4), inset 0px -3px 1px 4px rgba(204,198,197,.5);
+    transform: scale(.98);
   }
-  html, body {
-    min-height: 100%;
-    min-width: 100%;
+}
+@keyframes buttonRelease {
+  from {
+    background-image: -webkit-linear-gradient(top, #efedec, #f7f4f4);
+    box-shadow: 0 3px 5px 0 rgba(0,0,0,.4), inset 0px -3px 1px 4px rgba(204,198,197,.5);
+    transform: scale(.98);
   }
-  body {
-    background-image: -webkit-linear-gradient(top, #edecec, #cecbc9);
-    overscroll-behavior: contain;
-  }
-  .buttonHolder {
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    position: absolute;
-    background-color: rgba(255, 0, 0, 0.5);
-  }
-  .button {
+  to {
     background-image: -webkit-linear-gradient(top, #f4f1ee, #fff);
     box-shadow: 0px 8px 10px 0px rgba(0, 0, 0, .3), inset 0px 4px 1px 4px white, inset 0px -3px 1px 1px rgba(204,198,197,.5);
-    animation: buttonRelease .1s forwards;
-    border-radius: 50%;
-    height: 80vw;
-    max-height: 350px;
-    max-width: 350px;
-    width: 80vw;
+    transform: scale(1);
   }
-  .button:after {
-    color: #e9e6e4;
-    content: "";
-    height: 30px;
-    position: absolute;
-    width: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    filter: grayscale(0);
-  }
+}
+@media (min-width: 400px) {
   a {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 60vw;
-    text-decoration: none;
-    color: springgreen;
-    text-shadow: 0px -1px 1px #bdb5b4, 1px 1px 1px white;
-    -webkit-tap-highlight-color: transparent;
-    transition: .1s;
+    font-size: 250px;
   }
-  h1, button {
-    color: rgb(114, 112, 112);
-    text-shadow: 0px -1px 1px #bdb5b4, 1px 1px 1px white;
-    font-family: monospace;
-    position: absolute;
-    bottom: 1rem;
+}
+@media (max-width: 400px) {
+  h1 {
+    font-size: 6vw;
   }
-  button {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    bottom: 100vh;
-    border: none;
-    font-size: 3rem;
-    outline:0;
-  }
-  /* .button:active {
-    animation: buttonClick .1s forwards;
-  } */
-  @keyframes buttonClick {
-    to {
-      background-image: -webkit-linear-gradient(top, #efedec, #f7f4f4);
-      box-shadow: 0 3px 5px 0 rgba(0,0,0,.4), inset 0px -3px 1px 4px rgba(204,198,197,.5);
-      transform: scale(.98);
-    }
-  }
-  @keyframes buttonRelease {
-    from {
-      background-image: -webkit-linear-gradient(top, #efedec, #f7f4f4);
-      box-shadow: 0 3px 5px 0 rgba(0,0,0,.4), inset 0px -3px 1px 4px rgba(204,198,197,.5);
-      transform: scale(.98);
-    }
-    to {
-      background-image: -webkit-linear-gradient(top, #f4f1ee, #fff);
-      box-shadow: 0px 8px 10px 0px rgba(0, 0, 0, .3), inset 0px 4px 1px 4px white, inset 0px -3px 1px 1px rgba(204,198,197,.5);
-      transform: scale(1);
-    }
-  }
-  @media (min-width: 400px) {
-    a {
-      font-size: 250px;
-    }
-  }
-  @media (max-width: 400px) {
-    h1 {
-      font-size: 6vw;
-    }
-  }
+}

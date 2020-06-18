@@ -21,15 +21,15 @@
 AsyncWebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(1337);
 
-IPAddress staticIP(192, 168, 15, 200);
-IPAddress gateway(192, 168, 15, 1);
-IPAddress subnet(255, 255, 255, 0);
+// IPAddress staticIP(192, 168, 0, 2);
+// IPAddress gateway(192, 168, 0, 1);
+// IPAddress subnet(255, 255, 255, 0);
 
 String controlSwitch;
 bool controlState = false;
 String JSONtxt;
 uint8_t qtdClients;
-uint16_t ledBlickDelay = 1000;
+uint16_t ledBlinkDelay = 1000;
 
 typedef struct connections {
   IPAddress ip;
@@ -37,12 +37,11 @@ typedef struct connections {
   uint32_t sinceLastConnection;
   bool updateMe;
   uint32_t sinceLastMessage;
-}
-IPs;
+}IPs;
 
 IPs clients[WEBSOCKETS_SERVER_CLIENT_MAX + 1];
 
-String timeOn();
+char *timeOn();
 void setupWiFi();
 void setupSPIFFS();
 void setupWebSocket();
@@ -83,30 +82,28 @@ void setupWiFi() {
   WiFi.config(staticIP, gateway, subnet);
   WiFi.begin(ssid, password);
   if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    Serial.println('.');
+    Serial.print('.');
   }
 }
 
 void setupSPIFFS() {
   if (!SPIFFS.begin()) {
-    Serial.println("Error mounting SPIFFS");
-    while (1)
-    ;
+    while (1);
   }
-  Serial.println("SPIFFS started. Contents:");
+  Serial.print("SPIFFS started. Contents:\n");
   Dir dir = SPIFFS.openDir("/");
   while (dir.next()) {
     String fileName = dir.fileName();
     size_t fileSize = dir.fileSize();
     Serial.printf("\tFS File: %s, size: %s\r\n", fileName.c_str(), formatBytes(fileSize).c_str());
   }
-  Serial.printf("\n");
+  Serial.print("\n");
 }
 
 void setupWebSocket() {
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
-  Serial.println("WebSocket server started.");
+  Serial.print("WebSocket server started.\n");
 }
 
 void setupServer() {
@@ -117,20 +114,19 @@ void setupServer() {
 
   // Start web server
   server.begin();
-  Serial.println("HTTP server started.");
+  Serial.print("HTTP server started.\n");
 }
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t welenght) {
   IPAddress ip = webSocket.remoteIP(num);
   switch (type) {
   case WStype_DISCONNECTED:
-    Serial.printf("[%u] Desconectado!\n", num);
+    Serial.printf("[%u] Disconnected!\n", num);
     clients[num].state = 0;
     clients[num].sinceLastMessage = 0;
     break;
   case WStype_CONNECTED:
-    Serial.printf("[%u] Conectado com IP: ", num);
-    Serial.println(ip.toString());
+    Serial.printf("[%d] Connected with IP: %d.%d.%d.%d", num, ip[0], ip[1], ip[2], ip[3]);
     clients[num].state = 1;
     clients[num].ip = ip;
     clients[num].sinceLastConnection = millis();
@@ -141,14 +137,10 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t weleng
     clients[num].ip = ip;
     clients[num].updateMe = 1;
     clients[num].sinceLastMessage = millis();
-    // Serial.printf("[%u] Texto recebido: %s\n", num, payload);
-    if (strcmp((char * ) payload, "ping") == 0) {
-      // Serial.printf("[%u] Ping recebido!\n", num);
-    } else {
+    if (strcmp((char * ) payload, "ping") != 0) {
       String payloadString = (const char * ) payload;
       byte separator = payloadString.indexOf('=');
-      String
-      var = payloadString.substring(0, separator);
+      String var = payloadString.substring(0, separator);
       String val = payloadString.substring(separator + 1);
       if (var == "setControl") { //o app só pode ativar o controle
         controlState = true;
@@ -177,7 +169,7 @@ void onJavascriptRequest(AsyncWebServerRequest * request) {
 void onCSSRequest(AsyncWebServerRequest * request) {
   IPAddress remote_ip = request -> client() -> remoteIP();
   Serial.println("[" + remote_ip.toString() +
-    "] HTTP GET request of " + request -> url());
+"] HTTP GET request of " + request -> url());
   request -> send(SPIFFS, "/styles.css", "text/css");
 }
 
@@ -188,22 +180,14 @@ void onPageNotFound(AsyncWebServerRequest * request) {
   request -> send(404, "text/plain", "Not found");
 }
 
-String timeOn() {
+char *timeOn() {
   uint32_t duracao = millis();
   uint8_t segundos = ((duracao / 1000) % 60);
   uint8_t minutos = ((duracao / (1000 * 60)) % 60);
   uint8_t horas = ((duracao / (1000 * 60 * 60)) % 24);
   uint8_t dias = ((duracao / (1000 * 60 * 60 * 24)));
-  String tempo = "";
-  tempo += ((dias < 10) ? "0" : "");
-  tempo += String(dias);
-  tempo += ((horas < 10) ? "d 0" : "d ");
-  tempo += String(horas);
-  tempo += ((minutos < 10) ? "h 0" : "h ");
-  tempo += String(minutos);
-  tempo += ((segundos < 10) ? "m 0" : "m ");
-  tempo += String(segundos);
-  tempo += "s";
+  char *tempo = "99d 23h 59m 59s";
+  sprintf(tempo, "%02id %02ih %02im %02is", dias, horas, minutos, segundos);
   return tempo;
 }
 
@@ -232,11 +216,10 @@ void verifyClients() {
 }
 
 void updateClients() {
-  String JSONtxt = "{\"controlState\":\"" + controlSwitch + "\", \"timeOn\":\"" + timeOn() + "\"}";
+  String JSONtxt = "{\"controlState\":\"" + controlSwitch + "\", \"timeOn\":\"" + timeOn() + "\", \"qtdClients\":\"" + qtdClients + "\"}";
   for (uint8_t i = 0; i < WEBSOCKETS_SERVER_CLIENT_MAX; i++) {
     if (clients[i].state) {
       if (clients[i].updateMe) {
-        // Serial.printf("[%u] Dado enviado!\n", i);
         webSocket.sendTXT(i, JSONtxt);
         clients[i].updateMe = 0;
       }
@@ -244,13 +227,13 @@ void updateClients() {
   }
 }
 void disconnectClients() {
-    ledBlickDelay = 250;
+    ledBlinkDelay = 250;
   if (!qtdClients) {
-    ledBlickDelay = 1000;
+    ledBlinkDelay = 1000;
     return;
   }
-  static uint32_t wait;
-  if (millis() - wait > 1000) {
+  static uint32_t wait1000ms;
+  if (millis() - wait1000ms > 1000) {
     for (uint8_t i = 0; i < MAX_CLIENTS; i++) {
       if (clients[i].state) {
         if (millis() - clients[i].sinceLastMessage > 10000) {
@@ -267,9 +250,10 @@ void disconnectClients() {
           clients[i].ip[0], clients[i].ip[1], clients[i].ip[2], clients[i].ip[3],
           (clients[i].state) ? (millis() - clients[i].sinceLastConnection) / 1000 : 0,
           (clients[i].state) ? (millis() - clients[i].sinceLastMessage) / 1000 : 0);
+          Serial.printf("Free HEAP: %d bytes\n", ESP.getFreeHeap());
       }
     }
-    wait = millis();
+    wait1000ms = millis();
   }
 }
 String formatBytes(size_t bytes) { // convert sizes in bytes to KB and MB
@@ -284,7 +268,7 @@ String formatBytes(size_t bytes) { // convert sizes in bytes to KB and MB
 
 void ledBlink() {
   static unsigned long delayLed = 0;
-  if (millis() - delayLed > ledBlickDelay) {
+  if (millis() - delayLed > ledBlinkDelay) {
     digitalWrite(LED_PIN, !digitalRead(LED_PIN));
     delayLed = millis();
   }

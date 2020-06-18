@@ -1,6 +1,7 @@
 let url = "ws://" + window.location.hostname + ":1337/";
 let button;
 let timer;
+let qtdClients;
 let clickSoundOk;
 let clickSoundBad;
 let connected = 0;
@@ -10,7 +11,7 @@ let buttonBg;
 let pingInterval = 250; //tempo entre pings
 let untilReconnect = 2000; //tempo que entre cada tentativa de reconexão com o websocket
 let untilDisconnect = 2000; //tempo dado até o app considerar sem respostas e portanto desconexão com o websocket
-let untilCloseApp = 40000; //tempo dado até o app considerar que deve ser encerrado por falta de resposta (máximo 40s)
+let untilCloseApp = 35000; //tempo dado até o app considerar que deve ser encerrado por falta de resposta (máximo 40s)
 let pingResponse;
 let closeApp;
 let disconnect;
@@ -21,9 +22,9 @@ const OPEN = 1;
 const CLOSING = 2;
 const CLOSED = 3; 
 
-CONNECTING
 function init() {
   timer = document.getElementById("timeOn");
+  qtdClients = document.getElementById("qtdClients");
   button = document.getElementById("btn");
   clickSoundOk = document.getElementById('clickSoundOk');
   clickSoundBad = document.getElementById('clickSoundBad');
@@ -35,7 +36,7 @@ function init() {
 init();
 function wsConnect(url, reason) {
   if(!visible) return;
-  console.log('Se conectando, motivo: ' + reason);
+  console.log('Connecting, reason: ' + reason);
   if(websocket) console.log('Status 1: ' + websocket.readyState);
   if(websocket && (websocket.readyState === OPEN || websocket.readyState === CONNECTING)) return; 
   websocket = new WebSocket(url);
@@ -59,6 +60,7 @@ function onMessage(evt) {
   JSONobj = JSON.parse(evt.data);
   state = JSONobj.controlState;
   timer.innerHTML = `Ligado há: ${JSONobj.timeOn}`; 
+  qtdClients.innerHTML = `${JSONobj.qtdClients}`
   buttonBg.style.backgroundColor = 'rgba(255,0,0,0)';
   clearTimeout(disconnect);
   disconnect = setTimeout('setDisconnected(\'timeout\')', untilDisconnect);

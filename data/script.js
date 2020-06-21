@@ -90,10 +90,13 @@ function doSend(message) {
 button.onclick = function() {
   if(!connected) {
     clickSoundBad.play();
+    window.navigator.vibrate([0, 300, 400]);
     return;
   }
-  if(state == 'OFF')
+  if(state == 'OFF') {
     doSend("setControl");
+    window.navigator.vibrate([0, 300, 50]);
+  }
 }
 function doPing() {
   doSend("ping");
